@@ -813,8 +813,12 @@ public class EditableGraphPanel extends BasicGraphPanel {
 		Graph g = new Graph();
 
 		Hashtable<String, Node> protid = new Hashtable<String, Node>();
-
-		String[] first = data1.elementAt(2).split("\t");
+		int row = 2;
+		String elementAt2 = data1.elementAt(row);
+		while ("".equals(elementAt2)) {
+			elementAt2 = data1.elementAt(++row);
+		}
+		String[] first = elementAt2.split("\t");
 		Node rootnode = new Node();
 		rootnode.setLabel(first[4]);
 
@@ -831,9 +835,22 @@ public class EditableGraphPanel extends BasicGraphPanel {
 
 		Vector<String[]> protein_annotations = new Vector<String[]>();
 
-		for (int i = 3; i < data1.size(); i++) {
+		for (int i = row + 1; i < data1.size(); i++) {
 
-			String[] buf = data1.elementAt(i).split("\t");
+			String elementAt = data1.elementAt(i);
+			boolean breakFromLoop = false;
+			while ("".equals(elementAt)) {
+				++i;
+				if (i == data1.size()) {
+					breakFromLoop = true;
+					break;
+				}
+				elementAt = data1.elementAt(i);
+			}
+			if (breakFromLoop) {
+				break;
+			}
+			String[] buf = elementAt.split("\t");
 
 			String[] prt_ann = new String[2];
 
