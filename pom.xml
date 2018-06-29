@@ -74,7 +74,7 @@
             <artifactId>maven-jar-plugin</artifactId>
             <version>3.0.2</version>
             <configuration>
-               <finalName>pacom</finalName>
+               <finalName>RadialTopologyViewer</finalName>
                <archive>
                	  <manifest>
                      <addClasspath>true</addClasspath>
