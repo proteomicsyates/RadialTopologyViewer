@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.scripps.yates</groupId>
-  <artifactId>CoPIT_visualizer</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>CoPIT_visualizer</name>
+  <artifactId>RadialTopologyViewer</artifactId>
+  <version>0.6</version>
+  <name>RadialTopologyViewer</name>
   <distributionManagement>
     <repository>
       <id>internal</id>
@@ -15,8 +15,11 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+      <assembly.output.folder>RadialTopologyViewer</assembly.output.folder>
+      <lib.dir>lib</lib.dir>
+      <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+      <assembly.dir>RadialTopologyViewer_v${project.version}</assembly.dir>
+   </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -43,7 +46,7 @@
         <enabled>false</enabled>
       </snapshots>
       <id>internal</id>
-      <name>ProteoRed Internal Repository</name>
+      <name>John Yates's lab Internal maven Repository</name>
       <url>http://sealion.scripps.edu/archiva/repository/internal/</url>
     </repository>
     <repository>
@@ -59,48 +62,129 @@
     </repository>
   </repositories>
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </resource>
-    </resources>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-        </configuration>
-      </plugin>
-       
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
+      <extensions>
+         <extension>
+            <groupId>org.apache.maven.wagon</groupId>
+            <artifactId>wagon-webdav</artifactId>
+            <version>1.0-beta-2</version>
+         </extension>
+      </extensions>
+      <plugins>
+         <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.0.2</version>
             <configuration>
-              <sources>
-                <source>resources</source>
-              </sources>
+               <finalName>pacom</finalName>
+               <archive>
+               	  <manifest>
+                     <addClasspath>true</addClasspath>
+                     <mainClass>netQuant.RadialTopologyViewer</mainClass>
+                     <classpathPrefix>lib/</classpathPrefix>
+                     <useUniqueVersions>false</useUniqueVersions>
+                  </manifest>
+               </archive>
+               <outputDirectory>${project.build.directory}</outputDirectory>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+         </plugin>
+         <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.5.1</version>
+            <configuration>
+               <source>1.8</source>
+               <target>1.8</target>
+            </configuration>
+         </plugin>
+         <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.0.2</version>
+            <executions>
+               <execution>
+                  <id>copy-dependencies</id>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${project.build.directory}/${lib.dir}</outputDirectory>
+                     <overWriteReleases>true</overWriteReleases>
+                     <overWriteSnapshots>true</overWriteSnapshots>
+<!--                      <overWriteIfNewer>true</overWriteIfNewer> -->
+<!--                      useBaseVersion=false makes the jar names match those -->
+<!--                      that maven-jar-plugin puts in the manifest classpath  -->
+<!--  Either append the artifact's baseVersion or uniqueVersion to the filename. Will only be used if isStripVersion() is false. -->
+                	 <useBaseVersion>true</useBaseVersion>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>properties-maven-plugin</artifactId>
+	        <version>1.0.0</version>
+	        <executions>
+	          <execution>
+	            <phase>generate-resources</phase>
+	            <goals>
+	              <goal>write-project-properties</goal>
+	            </goals>
+	            <configuration>
+	              <outputFile>
+	                ${project.build.outputDirectory}/app.properties
+	              </outputFile>
+	              <properties>
+                    <property>
+                        <name>revision</name>
+                        <value>${revision}</value>
+                    </property>
+                    <property>
+                        <name>buildnumber</name>
+                        <value>${buildnumber}</value>
+                    </property>
+                </properties>
+	            </configuration>
+	          </execution>
+	        </executions>
+	      </plugin>
+      </plugins>
+   </build>
+   <profiles>
+      <profile>
+         <id>RadialTopologyViewer</id>
+<!--          <activation> -->
+<!--             <activeByDefault>true</activeByDefault> -->
+<!--          </activation> -->
+         <build>
+            <plugins>
+               <plugin>
+                  <artifactId>maven-assembly-plugin</artifactId>
+                  <version>3.1.0</version>
+                  <executions>
+                     <execution>
+                        <id>assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                           <goal>single</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+                  <configuration>
+                     <finalName>${assembly.dir}</finalName>
+                     <descriptors>
+                        <descriptor>${basedir}/resources/assembly_with_examples.xml</descriptor>
+                     </descriptors>
+                     <archive>
+		               	  <manifest>
+		                     <addClasspath>true</addClasspath>
+		                     <mainClass>netQuant.RadialTopologyViewer</mainClass>
+		                     <classpathPrefix>lib/</classpathPrefix>
+		                     <useUniqueVersions>false</useUniqueVersions>
+		                  </manifest>
+		               </archive>
+                  </configuration>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+	</profiles>
+	
 </project>

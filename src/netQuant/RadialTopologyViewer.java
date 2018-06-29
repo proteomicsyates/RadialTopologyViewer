@@ -79,6 +79,7 @@ import netQuant.graph.Graph;
 import netQuant.graph.Node;
 import netQuant.graphedit.EditGraphDialog;
 import netQuant.stringconnection.ConnectorManagerLite;
+import netQuant.utils.AppVersion;
 
 /**
  * The main holding and controlling frame for the graph displaying panels. This
@@ -89,6 +90,7 @@ import netQuant.stringconnection.ConnectorManagerLite;
  * @version 0.6
  */
 public final class RadialTopologyViewer extends JFrame implements ItemListener, ComponentListener, ChangeListener {
+	private static final String APP_PROPERTIES = "app.properties";
 
 	/**
 	 * to print label when exporting to EPS file
@@ -105,8 +107,7 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 	/**
 	 * version number
 	 */
-	public static final String version = "0.6";
-
+	public static AppVersion versionApp;
 	// this class should not directly require StringletPanel...
 	// use reflection
 	EditableGraphPanel stringletPanel;
@@ -134,7 +135,7 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 	Frame f = new Frame();
 
 	public RadialTopologyViewer() {
-		super("RadialTopologyViewer " + version);
+		super("RadialTopologyViewer " + getVersion().toString());
 	}
 
 	/**
@@ -242,6 +243,23 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 			JOptionPane.showMessageDialog(this, de.getMessage(), "Init Data Error", JOptionPane.ERROR_MESSAGE);
 			defaultNet();
 		}
+
+	}
+
+	public static netQuant.utils.AppVersion getVersion() {
+		if (versionApp == null) {
+			try {
+				String tmp = netQuant.utils.PropertiesReader.getProperties(APP_PROPERTIES).getProperty("assembly.dir");
+				if (tmp.contains("v")) {
+					versionApp = new netQuant.utils.AppVersion(tmp.split("v")[1]);
+				} else {
+					versionApp = new netQuant.utils.AppVersion(tmp);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return versionApp;
 
 	}
 
@@ -1724,7 +1742,7 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 	 * Show the version number in dialog
 	 */
 	private void aboutEvent() {
-		AboutDialog.showDialog(this, null, version);
+		AboutDialog.showDialog(this, null, getVersion().toString());
 	}
 
 	/**

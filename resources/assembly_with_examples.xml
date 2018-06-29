@@ -1,0 +1,107 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+      <id>with_examples</id>
+    
+    <formats>
+        <format>zip</format>
+        <format>tar.gz</format>
+    </formats>
+
+    
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+
+    <fileSets>
+
+        <fileSet>
+            <directory>target</directory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>target/${lib.dir}</directory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}/${lib.dir}</outputDirectory>
+        </fileSet>
+		<fileSet>
+			<directory>pme6_filtered</directory>
+			<includes>
+				<include>*percnt/*</include>
+			</includes>
+			<outputDirectory>${assembly.output.folder}/user_data/curated_exps</outputDirectory>
+		</fileSet>
+        <fileSet>
+            <directory>pme6_reanalysis_project</directory>
+            <includes>
+                <include>*.xml</include>
+            </includes>
+            <excludes>
+            	<exclude>PME6_Reanalysis*.xml</exclude>
+            </excludes>
+            <outputDirectory>${assembly.output.folder}/user_data/local_datasets/PME6_reanalysis</outputDirectory>
+        </fileSet>
+		<fileSet>
+            <directory>pme6_reanalysis_project</directory>
+            <includes>
+                <include>PME6_Reanalysis*.xml</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}/user_data/projects</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>metadata_templates</directory>
+            <includes>
+                <include>*.xml</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}/user_data/ms_metadata_templates</outputDirectory>
+        </fileSet>
+        <fileSet>
+        	<directory></directory>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}</outputDirectory>
+        </fileSet>
+        <fileSet>
+        	<directory></directory>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}</outputDirectory>
+        </fileSet>
+        <fileSet>
+        	<directory></directory>
+            <includes>
+                <include>README.txt</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}</outputDirectory>
+        </fileSet>
+<!--         <fileSet> -->
+<!--         	<directory></directory> -->
+<!--             <includes> -->
+<!--                 <include>Batch_Import_*.txt</include> -->
+<!--             </includes> -->
+<!--             <outputDirectory>${assembly.output.folder}</outputDirectory> -->
+<!--         </fileSet> -->
+        <fileSet>
+            <directory>example_input_files</directory>
+            <includes>
+                <include>*.*</include>
+            </includes>
+            <outputDirectory>${assembly.output.folder}/example_input_files</outputDirectory>
+        </fileSet>
+    </fileSets>
+
+
+<!--     <dependencySets> -->
+<!--         <dependencySet> -->
+<!--             <outputDirectory>${assembly.output.folder}/lib</outputDirectory> -->
+<!--             <unpack>false</unpack> -->
+<!--             <scope>runtime</scope> -->
+<!--         </dependencySet> -->
+<!--     </dependencySets> -->
+</assembly>
