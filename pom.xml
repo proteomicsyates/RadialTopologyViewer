@@ -169,6 +169,7 @@
                   </executions>
                   <configuration>
                      <finalName>${assembly.dir}</finalName>
+                     <appendAssemblyId>false</appendAssemblyId>
                      <descriptors>
                         <descriptor>${basedir}/src/main/resources/assembly_with_examples.xml</descriptor>
                      </descriptors>
