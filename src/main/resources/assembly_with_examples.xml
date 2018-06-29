@@ -37,11 +37,11 @@
         </fileSet>
 		
         <fileSet>
-            <directory>example_input_files</directory>
+            <directory>example_files</directory>
             <includes>
                 <include>*.*</include>
             </includes>
-            <outputDirectory>${assembly.output.folder}/example_input_files</outputDirectory>
+            <outputDirectory>${assembly.output.folder}/example_files</outputDirectory>
         </fileSet>
     </fileSets>
 
