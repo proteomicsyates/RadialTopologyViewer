@@ -2354,33 +2354,40 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 	 */
 	private boolean loadSettings() throws IOException {
 		File loadFile = new File("NetViewSettings.ini");
-		BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(loadFile)));
-		String inLine = in.readLine();
-		if (inLine == null) {
-			System.out.println("Error in NetViewSettings.ini");
-			return false;
-		}
-		// get last dir
-		Pattern dirPattern = Pattern.compile("LASTDIR=(.+)");
-		Matcher matcher = dirPattern.matcher(inLine);
-		// System.out.println(inLine);
-		if (matcher.find()) {
-			lastDir = matcher.group(1);
-			// System.out.println("Reading line "+lastDir);
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new InputStreamReader(new FileInputStream(loadFile)));
+			String inLine = in.readLine();
+			if (inLine == null) {
+				System.out.println("Error in NetViewSettings.ini");
+				return false;
+			}
+			// get last dir
+			Pattern dirPattern = Pattern.compile("LASTDIR=(.+)");
+			Matcher matcher = dirPattern.matcher(inLine);
+			// System.out.println(inLine);
+			if (matcher.find()) {
+				lastDir = matcher.group(1);
+				// System.out.println("Reading line "+lastDir);
 
-		} else {
-			// System.out.println("returning false from loadsettings");
-			return false;
+			} else {
+				lastDir = System.getProperty("user.dir");
+				// System.out.println("returning false from loadsettings");
+				return false;
+			}
+			// get last interaction file
+			inLine = in.readLine();
+			if (inLine != null) {
+				Pattern interPattern = Pattern.compile("INTERACT=(\\w+)");
+				matcher = interPattern.matcher(inLine);
+				if (matcher.find())
+					lastInter = matcher.group(1);
+			}
+		} finally {
+			if (in != null) {
+				in.close();
+			}
 		}
-		// get last interaction file
-		inLine = in.readLine();
-		if (inLine != null) {
-			Pattern interPattern = Pattern.compile("INTERACT=(\\w+)");
-			matcher = interPattern.matcher(inLine);
-			if (matcher.find())
-				lastInter = matcher.group(1);
-		}
-		in.close();
 		return true;
 	}
 
@@ -2520,17 +2527,24 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 	 * this is the function to give the order to the nodes
 	 */
 	private void setRadialLegendOrder() {
-
-		JFileChooser fc = new JFileChooser();
+		try {
+			loadSettings();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		int returnval = fc.showOpenDialog(this);
 		if (returnval == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			FileInputStream fis;
+
+			BufferedReader dis = null;
+
 			try {
-				fis = new FileInputStream(file);
+				updateLastFile(file);
+				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);
-				BufferedReader dis = new BufferedReader(new InputStreamReader(bis));
+				dis = new BufferedReader(new InputStreamReader(bis));
 				Vector<String> data1 = new Vector<String>();
 
 				data1.add(file.getName());
@@ -2541,13 +2555,26 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 					data1.add(data);
 				}
 				stringletPanel.setProteinOnthology(data1);
-
+				JOptionPane.showMessageDialog(this, "Radial order loaded properly", "Radial order",
+						JOptionPane.INFORMATION_MESSAGE);
 			} catch (FileNotFoundException e) {
 				JOptionPane.showMessageDialog(this, "File not found", "Data Error", JOptionPane.ERROR_MESSAGE);
 			} catch (IOException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, "The file could not be found or opened", "Load Error",
 						JOptionPane.ERROR_MESSAGE);
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this, "Some error occurred reading file", "Load Error",
+						JOptionPane.ERROR_MESSAGE);
+			} finally {
+				if (dis != null) {
+					try {
+						dis.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 
@@ -2558,16 +2585,22 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 	 */
 	private void radial() {
 
-		JFileChooser fc = new JFileChooser();
+		try {
+			loadSettings();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		JFileChooser fc = new JFileChooser(lastDir);
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		int returnval = fc.showOpenDialog(this);
 		if (returnval == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			FileInputStream fis;
+			BufferedReader dis = null;
 			try {
-				fis = new FileInputStream(file);
+				updateLastFile(file);
+				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);
-				BufferedReader dis = new BufferedReader(new InputStreamReader(bis));
+				dis = new BufferedReader(new InputStreamReader(bis));
 				Vector<String> data1 = new Vector<String>();
 
 				data1.add(file.getName());
@@ -2581,13 +2614,37 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 				String root = stringletPanel.setRadialData(data1);
 				stringletPanel.radial(getWidth(), getHeight(), root);
 				stringletPanel.repaint();
+				JOptionPane.showMessageDialog(this, "Input file loaded properly", "Input file loaded",
+						JOptionPane.INFORMATION_MESSAGE);
 			} catch (FileNotFoundException e) {
 				JOptionPane.showMessageDialog(this, "File not found", "Data Error", JOptionPane.ERROR_MESSAGE);
 			} catch (IOException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, "The file could not be found or opened", "Load Error",
 						JOptionPane.ERROR_MESSAGE);
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this, "Some error ocurred during reading input file:\n" + e.getMessage(),
+						"Load Error", JOptionPane.ERROR_MESSAGE);
+			} finally {
+				if (dis != null) {
+					try {
+						dis.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
+
+		}
+
+	}
+
+	private void updateLastFile(File file) throws IOException {
+		if (file.isFile()) {
+			lastFile = file.getAbsolutePath();
+			lastDir = file.getParent();
+			saveSettings();
 		}
 
 	}
@@ -2606,11 +2663,11 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 		int returnval = fc.showOpenDialog(this);
 		if (returnval == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			FileInputStream fis;
+			BufferedReader dis = null;
 			try {
-				fis = new FileInputStream(file);
+				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);
-				BufferedReader dis = new BufferedReader(new InputStreamReader(bis));
+				dis = new BufferedReader(new InputStreamReader(bis));
 				Vector<String> data1 = new Vector<String>();
 				String data = null;
 				while ((data = dis.readLine()) != null) {
@@ -2619,13 +2676,26 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 				}
 
 				stringletPanel.setNodesQuantData(data1);
-
+				JOptionPane.showMessageDialog(this, "Quant data set correctly", "Quant data loaded",
+						JOptionPane.INFORMATION_MESSAGE);
 			} catch (FileNotFoundException e) {
 				JOptionPane.showMessageDialog(this, "File not found", "Data Error", JOptionPane.ERROR_MESSAGE);
 			} catch (IOException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, "The file could not be found or opened", "Load Error",
 						JOptionPane.ERROR_MESSAGE);
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this, "Error loading input file:\n" + e.getMessage(), "Load Error",
+						JOptionPane.ERROR_MESSAGE);
+			} finally {
+				if (dis != null) {
+					try {
+						dis.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 
 		}
@@ -2647,11 +2717,11 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 		int returnval = fc.showOpenDialog(this);
 		if (returnval == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			FileInputStream fis;
+			BufferedReader dis = null;
 			try {
-				fis = new FileInputStream(file);
+				FileInputStream fis = new FileInputStream(file);
 				BufferedInputStream bis = new BufferedInputStream(fis);
-				BufferedReader dis = new BufferedReader(new InputStreamReader(bis));
+				dis = new BufferedReader(new InputStreamReader(bis));
 				Vector<String> data1 = new Vector<String>();
 				String data = null;
 				while ((data = dis.readLine()) != null) {
@@ -2667,6 +2737,18 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, "The file could not be found or opened", "Load Error",
 						JOptionPane.ERROR_MESSAGE);
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this, "Error reading bait input file:\n" + e.getMessage(), "Load Error",
+						JOptionPane.ERROR_MESSAGE);
+			} finally {
+				if (dis != null) {
+					try {
+						dis.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 
 		}

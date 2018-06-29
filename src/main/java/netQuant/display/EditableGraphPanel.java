@@ -788,10 +788,19 @@ public class EditableGraphPanel extends BasicGraphPanel {
 	public void setProteinOnthology(Vector<String> data1) {
 
 		for (int i = 2; i < data1.size(); i++) {
-			String[] buf = data1.elementAt(i).split("\t");
+			String elementAt = data1.elementAt(i);
+			while ("".equals(elementAt)) {
+				i++;
+				if (i == data1.size()) {
+					return;
+				}
+				elementAt = data1.elementAt(i);
+			}
 
-			buf[0] = buf[0].toLowerCase();
-			buf[0] = buf[0].split("/")[0];
+			String[] buf = elementAt.split("\t");
+
+			// buf[0] = buf[0].toLowerCase();
+			// buf[0] = buf[0].split("/")[0];
 			buf[0] = buf[0].trim();
 
 			if (!protein_onthology.containsKey(buf[0])) {
@@ -856,8 +865,8 @@ public class EditableGraphPanel extends BasicGraphPanel {
 
 			if (buf.length == 5) {
 
-				buf[3] = buf[3].toLowerCase();
-				buf[3] = buf[3].split("/")[0];
+				// buf[3] = buf[3].toLowerCase();
+				// buf[3] = buf[3].split("/")[0];
 
 				// if (buf[3].endsWith(" ")) {
 				buf[3] = buf[3].trim();// String.valueOf(buf[3].subSequence(0,
@@ -906,6 +915,7 @@ public class EditableGraphPanel extends BasicGraphPanel {
 		 * (entry.length==1) { root = entry[0]; } else { Edge e = new
 		 * Edge(root,entry[0], Float.parseFloat(entry[1]),1 ); g.addEdge(e); } }
 		 */
+		graph = new Graph();
 		graph.addGraph(g);
 
 		for (int i = 0; i < protein_annotations.size(); i++) {

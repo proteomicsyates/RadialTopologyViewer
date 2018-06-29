@@ -1,0 +1,30 @@
+Name_Pathway	order
+Endocytosis	1
+Plasma membrane microdomain organization / anchoring	2
+Calcium signaling	3
+Signaling	4
+ROS signaling	5
+Immune response	6
+Mitochondrial function	7
+Metabolism	8
+Lipid Metabolism	9
+Uncharacterized	10
+Nucleic Acid metabolism	11
+DNA replication	12
+DNA repair	13
+Chromatin structure	14
+Apoptosis 	15
+Transcription	16
+Nuclear import / export	17
+RNA processing	18
+Translation	19
+Translocation	20
+N-glycosylation	21
+Folding 	22
+ER quality control	23
+post translational modification	23
+Trafficking	24
+Degradation	25
+Cytoskeleton	26
+Cell adhesion	27
+Ion Transport	28
