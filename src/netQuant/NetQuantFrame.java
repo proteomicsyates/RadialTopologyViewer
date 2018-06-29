@@ -75,7 +75,6 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import edu.scripps.p3.P3;
 import netQuant.dataio.DataLoader;
 import netQuant.display.EditableGraphPanel;
 import netQuant.graph.Graph;
@@ -2784,10 +2783,14 @@ public final class NetQuantFrame extends JFrame implements ItemListener, Compone
 	 */
 	private void runPPP3() {
 
-		P3 ppp3 = new P3();
-		ppp3.run();
-
-		ppp3 = null;
+		/*
+		 * deactivated because I am not sure when this is used!! P3 ppp3 = new
+		 * P3(); ppp3.run();
+		 */if (true)
+			throw new IllegalArgumentException("I deactivated ppp3 but is it used then?");
+		/*
+		 * ppp3 = null;
+		 */
 		System.gc();
 
 	}

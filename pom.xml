@@ -31,11 +31,11 @@
       <artifactId>swing-layout</artifactId>
       <version>1.0.2</version>
     </dependency>
-    <dependency>
-      <groupId>edu.scripps.yates</groupId>
-      <artifactId>P3</artifactId>
-      <version>0.2</version>
-    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>edu.scripps.yates</groupId> -->
+<!--       <artifactId>P3</artifactId> -->
+<!--       <version>0.2</version> -->
+<!--     </dependency> -->
   </dependencies>
   <repositories>
     <repository>
