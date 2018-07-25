@@ -28,11 +28,13 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import netQuant.DataFormatException;
 import netQuant.NetQuantSettings;
 import netQuant.RadialTopologyViewer;
@@ -721,6 +723,7 @@ public class DataLoader implements Runnable {
 		File saveFile = new File(saveFileName);
 		FileWriter out = new FileWriter(saveFile);
 		out.write("%!PS\n");
+		out.write("<< /PageSize [" + docWidth + " " + docHeight + "] >> setpagedevice\n");
 
 		drawGraph(g, out, ss);
 
@@ -737,22 +740,27 @@ public class DataLoader implements Runnable {
 		FileWriter out = new FileWriter(saveFile);
 		out.write("%!PS-Adobe EPSF-3.0\n");
 		out.write("%%Creator: Medusa\n");
-		// out.write("%%BoundingBox: 0 0 " + docWidth + " " + docHeight + "\n");
-		out.write("%%BoundingBox: 0 0 " + "3000" + " " + "3000" + "\n");
+		out.write("%%Title: " + saveFileName + "\n");
+		out.write("%%BoundingBox: 0 0 " + docWidth + " " + docHeight + "\n");
+		// out.write("%%BoundingBox: 0 0 " + "3000" + " " + "3000" + "\n");
+
 		drawGraph(g, out, ss);
 
 		// finish the PS
-		// out.write("showpage\n");
+		out.write("showpage\n");
 		out.close();
 	}
 
 	private void drawGraph(Graph g, FileWriter out, NetQuantSettings ss) throws IOException {
 
 		// out.write("50 50 translate\n");
-		out.write("-150 300 translate\n");
+		// out.write("-150 300 translate\n");
 
 		out.write("0.2 setlinewidth\n");
 		out.write("0 0 0 setrgbcolor\n");
+
+		// set scale factor
+		setScaleFactor(g);
 
 		// draw the edges
 		drawEdges(out, g, ss);
@@ -765,23 +773,74 @@ public class DataLoader implements Runnable {
 			drawLabels(out, g);
 		}
 
-		// finish the PS
-		// out.write("showpage\n");
-		// out.close();
+	}
+
+	private void setScaleFactor(Graph g) {
+		TDoubleArrayList xs = new TDoubleArrayList();
+		TDoubleArrayList ys = new TDoubleArrayList();
+		// TODO Auto-generated method stub
+		for (java.util.Iterator i = g.nodesIterator(); i.hasNext();) {
+			Node n = (Node) i.next();
+			xs.add(n.getX());
+			ys.add(n.getY());
+		}
+		double minX = xs.min();
+		double maxX = xs.max();
+		System.out.println(minX + "\t" + maxX);
+		double minY = ys.min();
+		double maxY = ys.max();
+		System.out.println(minY + "\t" + maxY);
+
+		int margin = 20;
+		minX = minX - margin;
+		maxX = maxX + margin;
+		minY = minY - margin;
+		maxY = maxY + margin;
+		// set new boundaries
+		translationX = minX;
+		networkWidth = maxX - minX;
+		translationY = minY;
+		networkHeight = maxY - minY;
+		double scaleFactor = Math.max(docWidth / networkWidth, docHeight / networkHeight);
+		if (scaleFactor > 1) {
+			nodeSize = Double.valueOf(nodeSize * scaleFactor / 2).intValue();
+			fontSize = Double.valueOf(fontSize * scaleFactor).intValue();
+		}
 	}
 
 	// public Color getColor(Integer i){
 	// return stringSettings.getColor(i);
 	// }
-	final int docWidth = 500;
-	final int docHeight = 500;
+	int docWidth = 1000;
+	int docHeight = 1000;
+
+	private double translationX = 0;
+	private double translationY = 0;
+
+	// private double originalDocumentWidth = 600;
+	// private double originalDocumentHeight = 600;
+	// private int psY(double y) {
+	// return (int) ((originalDocumentHeight - y) / originalDocumentHeight *
+	// docHeight);
+	// }
+	//
+	// private int psX(double x) {
+	// return (int) (x / originalDocumentWidth * docWidth);
+	// }
 
 	private int psY(double y) {
-		return (int) ((600.0 - y) / 600.0 * docHeight);
+		int i = (int) ((y - translationY) / networkHeight * docHeight);
+		return i;
 	}
 
+	private final DecimalFormat df = new DecimalFormat("#.#");
+	private double networkWidth;
+	private double networkHeight;
+	private boolean setAlpha = false;
+
 	private int psX(double x) {
-		return (int) (x / 600.0 * docWidth);
+		int i = (int) ((x - translationX) / networkWidth * docWidth);
+		return i;
 	}
 
 	private void drawEdges(FileWriter out, Graph g, NetQuantSettings ss) throws IOException {
@@ -810,7 +869,11 @@ public class DataLoader implements Runnable {
 			color = ss.getColor(colorType);
 			alpha = e.getConf();
 			out.write(colorToString(color));
-			out.write(alpha + " setalpha\n");
+			if (setAlpha) {
+				out.write(alpha + " setalpha\n");
+			} else {
+				out.write("\n");
+			}
 			// check if we want a path or a line
 			if (e.getOrientation() != 0.0) {
 				int[] cPoints = PaintTools.intControlPoints(x1, y1, x2, y2, e.getOrientation(), BasicGraphPanel.offset);
@@ -823,7 +886,11 @@ public class DataLoader implements Runnable {
 			}
 
 		}
-		out.write("1.0 setalpha\n");
+		if (setAlpha) {
+			out.write("1.0 setalpha\n");
+		} else {
+			out.write("\n");
+		}
 	}
 
 	private String colorToString(final Color color) {
@@ -876,6 +943,7 @@ public class DataLoader implements Runnable {
 		java.awt.Color color = n.getColor();
 		int shape = n.getShape();
 		// int nodeSize=8;
+		System.out.println(n.getLabel() + "\t" + n.getX() + "-" + n.getY());
 
 		out.write(colorToString(color));
 		switch (shape) {
