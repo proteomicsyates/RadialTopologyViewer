@@ -95,7 +95,7 @@ public final class RadialTopologyViewer extends JFrame implements ItemListener, 
 	/**
 	 * to print label when exporting to EPS file
 	 */
-	public static boolean printLabelEPS = false;
+	public static boolean printLabelEPS = true;
 	/**
 	 * @serial
 	 */
