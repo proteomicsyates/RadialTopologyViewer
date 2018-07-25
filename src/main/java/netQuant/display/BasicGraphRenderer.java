@@ -141,7 +141,7 @@ public class BasicGraphRenderer extends JPanel {
 
 	// the applications dimensions
 
-	final int defaultSize = 600;
+	final int defaultSize = 1200;
 	protected int panelWidth = defaultSize;
 	protected int panelHeight = defaultSize;
 
